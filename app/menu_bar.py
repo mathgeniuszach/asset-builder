@@ -1,0 +1,75 @@
+from .globals import *
+
+from . import load_packs
+from . import help_win
+
+def wrap(m, **kw):
+    def x(sender, app_data, user_data, *args, **kwargs):
+        m(*args, **kw, **kwargs)
+        gui.hide_item("file_menu")
+    
+    return x
+
+class MenuBar:
+    def __init__(self):
+        with gui.menu_bar():
+            with gui.menu(label="File", tag="file_menu"):
+                # Shortcuts
+                gui.add_menu_item(label="Open", shortcut='Ctrl+O', tag="open", callback=self.file_button)
+                gui.add_menu_item(label="Save", shortcut='Ctrl+S', tag="save", callback=self.file_button)
+                gui.add_menu_item(label="Save As", shortcut='Ctrl+Shift+S', tag="save_as", callback=self.file_button)
+                gui.add_menu_item(label="Export", shortcut='Ctrl+E', tag="export", callback=self.file_button)
+                gui.add_menu_item(label="Close", shortcut='Ctrl+W', tag="close", callback=self.file_button)
+            
+            with gui.menu(label="Options"):
+                gui.add_menu_item(label="Prompt on Unsaved Work", tag="unsaved_prompt", check=True, callback=self.change_option)
+                gui.add_menu_item(label="Autobackup Work", tag="autosave", check=True, callback=self.change_option)
+                gui.add_menu_item(label="Nearest Scaling", tag="nearest", check=True, callback=self.change_option)
+            
+            gui.add_menu_item(label="Reload", tag="reload", callback=lambda: load_packs.reload())
+
+            self.help = help_win.HelpWindow()
+            gui.add_menu_item(label="Help", callback=self.help.show)
+
+            gui.add_menu_item(label="Discord", callback=lambda: webbrowser.open(DISCORD))
+
+            gui.add_text("  ", tag="message")
+
+            # Load options
+            log.info("Loading options")
+            try:
+                with OPTIONS.open("r", encoding="utf-8") as file:
+                    self.opts = json.load(file)
+            except FileNotFoundError:
+                self.opts = {}
+            except Exception:
+                log.warn("Failed to load options file, recreating it.", exc_info=True)
+                self.opts = {}
+
+            gui.set_value("unsaved_prompt", self.opts.get("unsaved_prompt", True))
+            gui.set_value("autosave", self.opts.get("autosave", True))
+            gui.set_value("nearest", self.opts.get("nearest", True))
+    
+    def file_button(self, sender):
+        if   sender == "open":      G.app.tab_bar.open()
+        elif sender == "save":      G.app.tab_bar.save_tab()
+        elif sender == "save_as":   G.app.tab_bar.save_tab(save_as=True)
+        elif sender == "export":    G.app.tab_bar.save_tab(save_as=True, no_load=True)
+        elif sender == "close":     G.app.tab_bar.close_tab()
+
+        gui.hide_item("file_menu")
+        gui.show_item("file_menu")
+    
+    def change_option(self, sender):
+        self.opts[sender] = gui.get_value(sender)
+        try:
+            with OPTIONS.open("w", encoding="utf-8") as file:
+                json.dump(self.opts, file)
+        except Exception:
+            log.error("Failed to write to options file!", exc_info=True)
+            self.opts = {}
+        
+        G.app.change()
+    
+    def set_message(self, text):
+        gui.set_value("message", "  "+text)
