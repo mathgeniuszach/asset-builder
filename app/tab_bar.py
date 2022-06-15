@@ -7,18 +7,18 @@ n = 1
 
 class TabBar:
     def __init__(self):
-        with gui.tab_bar(tag="tabs", reorderable=True, callback=self.choose_tab):
-            gui.add_tab_button(label="+", trailing=True, callback=self.add_tab)
-            gui.add_tab_button(label="x", trailing=True, callback=self.close_tab)
+        with gui.tab_bar(tag="tabs", reorderable=True, callback=lambda: self.choose_tab()):
+            gui.add_tab_button(label="+", trailing=True, callback=lambda: self.add_tab())
+            gui.add_tab_button(label="x", trailing=True, callback=lambda: self.close_tab())
             self.tab_count = 0
             self.add_tab()
     
     def remove_all_tabs(self):
         gui.delete_item("tabs", children_only=True)
-        gui.add_tab_button(label="+", trailing=True, parent="tabs", callback=self.add_tab)
-        gui.add_tab_button(label="x", trailing=True, parent="tabs", callback=self.close_tab)
+        gui.add_tab_button(label="+", trailing=True, parent="tabs", callback=lambda: self.add_tab())
+        gui.add_tab_button(label="x", trailing=True, parent="tabs", callback=lambda: self.close_tab())
     
-    def add_tab(self, _=None, __=None, ___=None, data=None):
+    def add_tab(self, data=None):
         global n
         sn = str(n)
         n += 1

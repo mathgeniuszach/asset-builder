@@ -7,7 +7,7 @@ class TypeSelector:
         with gui.child_window(width=-1, height=-2):
             with gui.group(horizontal=True):
                 gui.add_text("Type:")
-                gui.add_combo([""], tag="type", width=-1, callback=self.change_type)
+                gui.add_combo([""], tag="type", width=-1, callback=lambda: self.change_type())
                 gui.set_value("type", "")
             gui.add_separator()
             gui.add_child_window(tag="parts", autosize_x=True, autosize_y=True, border=False)

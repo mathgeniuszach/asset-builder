@@ -11,14 +11,14 @@ class MessageBox:
             gui.add_text(text)
             with gui.group(horizontal=True):
                 for label in buttons:
-                    gui.add_button(label=label, tag=f"{tag}-{label}", callback=self.clicked)
+                    gui.add_button(label=label, tag=f"{tag}-{label}", callback=lambda s: self.clicked(s))
         
         self.showing = False
         self.modalsize = [-1, -1]
 
         # HACK: Visibility handler that is only used twice (that is, until the system is sure what size the modal is)
         with gui.item_handler_registry(tag=tag+"-handler"):
-            gui.add_item_visible_handler(callback=self.on_show)
+            gui.add_item_visible_handler(callback=lambda: self.on_show())
         gui.bind_item_handler_registry(tag, tag+"-handler")
 
     def on_show(self):

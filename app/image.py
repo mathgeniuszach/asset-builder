@@ -36,11 +36,11 @@ class ImageStacker:
         self.image = None
 
         with gui.handler_registry():
-            gui.add_mouse_drag_handler(callback=self.update_pan)
-            gui.add_mouse_release_handler(callback=self.end_pan)
-            gui.add_mouse_wheel_handler(callback=self.adjust_pan)
+            gui.add_mouse_drag_handler(callback=lambda s,a: self.update_pan(a))
+            gui.add_mouse_release_handler(callback=lambda: self.end_pan())
+            gui.add_mouse_wheel_handler(callback=lambda: self.adjust_pan())
         with gui.item_handler_registry() as self.ph:
-            gui.add_item_clicked_handler(callback=self.start_pan, button=0)
+            gui.add_item_clicked_handler(callback=lambda: self.start_pan(), button=0)
 
         with gui.child_window(width=-1, height=-2) as self.cwin:
             with gui.group(tag="zoombar", horizontal=True):
@@ -48,7 +48,7 @@ class ImageStacker:
                     min_value=0,
                     max_value=len(ImageStacker.ZOOM_LEVELS)-1,
                     default_value=ImageStacker.ZOOM_LEVELS.index(self.zoom),
-                    callback=self.update_zoom,
+                    callback=lambda: self.update_zoom(),
                     width=ImageStacker.ZOOM_WIDTH,
                     format=''
                 )
@@ -104,7 +104,7 @@ class ImageStacker:
         self.panning = False
     def adjust_pan(self):
         self.scroll = (gui.get_x_scroll(self.cwin), gui.get_y_scroll(self.cwin))
-    def update_pan(self, _, appdata):
+    def update_pan(self, appdata):
         if self.panning:
             px = appdata[1] - self.pan[0]
             py = appdata[2] - self.pan[1]

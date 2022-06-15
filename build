@@ -1,0 +1,3 @@
+#!/bin/bash
+
+nuitka3 --enable-plugin=numpy --enable-plugin=upx --follow-imports --standalone --onefile --full-compat ./asset_builder.py

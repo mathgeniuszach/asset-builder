@@ -15,21 +15,21 @@ class MenuBar:
         with gui.menu_bar():
             with gui.menu(label="File", tag="file_menu"):
                 # Shortcuts
-                gui.add_menu_item(label="Open", shortcut='Ctrl+O', tag="open", callback=self.file_button)
-                gui.add_menu_item(label="Save", shortcut='Ctrl+S', tag="save", callback=self.file_button)
-                gui.add_menu_item(label="Save As", shortcut='Ctrl+Shift+S', tag="save_as", callback=self.file_button)
-                gui.add_menu_item(label="Export", shortcut='Ctrl+E', tag="export", callback=self.file_button)
-                gui.add_menu_item(label="Close", shortcut='Ctrl+W', tag="close", callback=self.file_button)
+                gui.add_menu_item(label="Open", shortcut='Ctrl+O', tag="open", callback=lambda s: self.file_button(s))
+                gui.add_menu_item(label="Save", shortcut='Ctrl+S', tag="save", callback=lambda s: self.file_button(s))
+                gui.add_menu_item(label="Save As", shortcut='Ctrl+Shift+S', tag="save_as", callback=lambda s: self.file_button(s))
+                gui.add_menu_item(label="Export", shortcut='Ctrl+E', tag="export", callback=lambda s: self.file_button(s))
+                gui.add_menu_item(label="Close", shortcut='Ctrl+W', tag="close", callback=lambda s: self.file_button(s))
             
             with gui.menu(label="Options"):
-                gui.add_menu_item(label="Prompt on Unsaved Work", tag="unsaved_prompt", check=True, callback=self.change_option)
-                gui.add_menu_item(label="Autobackup Work", tag="autosave", check=True, callback=self.change_option)
-                gui.add_menu_item(label="Nearest Scaling", tag="nearest", check=True, callback=self.change_option)
+                gui.add_menu_item(label="Prompt on Unsaved Work", tag="unsaved_prompt", check=True, callback=lambda s: self.change_option(s))
+                gui.add_menu_item(label="Autobackup Work", tag="autosave", check=True, callback=lambda s: self.change_option(s))
+                gui.add_menu_item(label="Nearest Scaling", tag="nearest", check=True, callback=lambda s: self.change_option(s))
             
             gui.add_menu_item(label="Reload", tag="reload", callback=lambda: load_packs.reload())
 
             self.help = help_win.HelpWindow()
-            gui.add_menu_item(label="Help", callback=self.help.show)
+            gui.add_menu_item(label="Help", callback=lambda: self.help.show())
 
             gui.add_menu_item(label="Discord", callback=lambda: webbrowser.open(DISCORD))
 

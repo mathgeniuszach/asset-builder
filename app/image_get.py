@@ -141,6 +141,7 @@ def colorize_image(image: Image.Image, color):
     return outimg.convert("RGBA")
 
 def get_im(part, k):
+    if k is None: return None
     return part.get(k) or part.get(k + "_1") or part.get("_")
 
 def get_image(parts, item):
@@ -159,7 +160,7 @@ def get_image(parts, item):
         if type(k) == list: k = k[0]
 
         prevpart = part
-        part = get_im(k)
+        part = get_im(part, k)
         if part is None:
             return None
 

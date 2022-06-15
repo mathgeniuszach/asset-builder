@@ -8,7 +8,7 @@ from copy import deepcopy
 class Checkbox:
     def __init__(self, id, text):
         self.id = id
-        self.tag = gui.add_checkbox(label=text, tag="check/"+id, callback=self.change)
+        self.tag = gui.add_checkbox(label=text, tag="check/"+id, callback=lambda: self.change())
     
     def change(self):
         v = gui.get_value(self.tag)
@@ -38,20 +38,20 @@ class ColorEditPopup:
 
             with gui.popup(G.app.nonbutton) as zelf.popup:
                 with gui.group(horizontal=True):
-                    gui.add_button(label="Copy", callback=zelf.copy)
-                    gui.add_button(label="Copy Color", callback=zelf.copy_color)
-                    gui.add_button(label="Paste", callback=zelf.paste)
-                    gui.add_button(label="Reset", callback=zelf.reset)
+                    gui.add_button(label="Copy", callback=lambda: zelf.copy())
+                    gui.add_button(label="Copy Color", callback=lambda: zelf.copy_color())
+                    gui.add_button(label="Paste", callback=lambda: zelf.paste())
+                    gui.add_button(label="Reset", callback=lambda: zelf.reset())
                 
                 gui.add_text("Adjustments")
-                zelf.contrast = gui.add_slider_float(tag="contrast", label="Contrast", min_value=0, default_value=1, max_value=2, callback=zelf.change_slider)
-                zelf.sharpness = gui.add_slider_float(tag="sharpness", label="Sharpness", min_value=0, default_value=1, max_value=2, callback=zelf.change_slider)
-                zelf.blur_steps = gui.add_slider_float(tag="blur_steps", label="Max Blur", min_value=1, default_value=1, max_value=20, callback=zelf.change_slider)
-                zelf.brightness = gui.add_slider_int(tag="brightness", label="Brightness", min_value=-255, max_value=255, clamped=True, callback=zelf.change_slider)
+                zelf.contrast = gui.add_slider_float(tag="contrast", label="Contrast", min_value=0, default_value=1, max_value=2, callback=lambda s,a: zelf.change_slider(s,a))
+                zelf.sharpness = gui.add_slider_float(tag="sharpness", label="Sharpness", min_value=0, default_value=1, max_value=2, callback=lambda s,a: zelf.change_slider(s,a))
+                zelf.blur_steps = gui.add_slider_float(tag="blur_steps", label="Max Blur", min_value=1, default_value=1, max_value=20, callback=lambda s,a: zelf.change_slider(s,a))
+                zelf.brightness = gui.add_slider_int(tag="brightness", label="Brightness", min_value=-255, max_value=255, clamped=True, callback=lambda s,a: zelf.change_slider(s,a))
                 gui.add_text("Color Mode")
-                zelf.combo = gui.add_combo(items=list(ColorEditPopup.modes.values()), callback=zelf.change_mode)
+                zelf.combo = gui.add_combo(items=list(ColorEditPopup.modes.values()), callback=lambda: zelf.change_mode())
                 gui.add_text("Color")
-                zelf.color_picker = gui.add_color_picker(no_alpha=True,  callback=zelf.change_color)
+                zelf.color_picker = gui.add_color_picker(no_alpha=True,  callback=lambda: zelf.change_color())
         else:
             zelf = ColorEditPopup.zelf
         
@@ -142,8 +142,8 @@ class ColorEdit4:
 
         self.edits = []
         with gui.item_handler_registry() as self.och:
-            gui.add_item_clicked_handler(callback=self.open_color, button=0)
-            gui.add_item_clicked_handler(callback=self.reset_color, button=1)
+            gui.add_item_clicked_handler(callback=lambda s,a: self.open_color(a), button=0)
+            gui.add_item_clicked_handler(callback=lambda s,a: self.reset_color(a), button=1)
 
         with gui.child_window(width=-1, height=26, border=False) as self.win:
             for i in range(4):
@@ -228,12 +228,12 @@ class ColorEdit4:
                 gui.bind_item_theme(t, G.app.invert_theme)
         if text: gui.set_value(t, text)
     
-    def open_color(self, _, app_data):
+    def open_color(self, app_data):
         x, y = get_abs_pos(self.win)
         i = gui.get_item_user_data(app_data[1])
         self.popup.show((x, y+25), self.typ, self.item, i, self)
     
-    def reset_color(self, _=None, app_data=None, i=None):
+    def reset_color(self, app_data=None, i=None):
         if i is None:
             i = gui.get_item_user_data(app_data[1])
         self.get_active()[i] = {}
@@ -300,11 +300,11 @@ class EditRow:
             if n:
                 with gui.group(horizontal=True, horizontal_spacing=0):
                     gui.bind_item_theme(gui.add_button(width=-30, enabled=False), G.app.hide_theme)
-                    gui.add_button(label="-", width=25, callback=self.remove)
+                    gui.add_button(label="-", width=25, callback=lambda: self.remove())
             else:
                 gui.add_text(item.replace("_", " "))
             
-            self.combo = gui.add_combo(width=-1, callback=self.change_combo)
+            self.combo = gui.add_combo(width=-1, callback=lambda: self.change_combo())
             self.reset_combo()
 
             self.color_editor = ColorEdit4(typ, item, -1 if multi is None else n)
@@ -391,7 +391,7 @@ class MultiEditRow:
         self.atr = gui.generate_uuid()
         with gui.table_row(tag=self.atr):
             gui.add_text("")
-            gui.add_button(label="+", callback=self.add_row, width=25)
+            gui.add_button(label="+", callback=lambda: self.add_row(), width=25)
     
     def add_row(self, update=True):
         self.edit_rows.append(

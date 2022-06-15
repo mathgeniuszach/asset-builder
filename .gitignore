@@ -2,3 +2,7 @@ __pycache__
 autosave.json
 options.json
 log.txt
+
+asset_builder.build
+asset_builder.dist
+asset_builder.bin
