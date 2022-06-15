@@ -3,6 +3,7 @@ autosave.json
 options.json
 log.txt
 
+asset_builder
 asset_builder.build
 asset_builder.dist
 asset_builder.bin
