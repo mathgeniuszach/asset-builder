@@ -1,3 +1,0 @@
-#!/bin/bash
-
-nuitka3 --enable-plugin=numpy --enable-plugin=upx --follow-imports --standalone --onefile --full-compat --linux-onefile-icon="./i/icon-large.png" ./asset_builder.py

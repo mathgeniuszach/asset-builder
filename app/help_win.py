@@ -24,8 +24,9 @@ class HelpWindow:
                 wrap_text("First, you have the menu bar.")
                 wrap_text("The File menu allows you to open, save, save as, export, or close out the current tab you are in. Exporting does the same thing as saving, except it doesn't allow you to re-load the image back into the tool.")
                 wrap_text("The Options menu will let you disable the prompt to save on closing a tab, turn off autobackup, or change the zoom mode. The Reload button will reload all asset packs from the packs folder.")
+                wrap_text("The Packs menu will let you see a list of all the packs you have loaded, or reload all the packs from the packs folder.")
                 wrap_text("The Help button is self explanitory.")
-                wrap_text("The Discord button will open up a join link for you to join my Discord if you need specific help.")
+                wrap_text("The Discord button will open up a join link for you to join my Discord if you need more specific help.")
                 gap(4)
 
                 wrap_text("Second, you have the tab bar. Each project you work on can be separated into distinct, separate tabs. You can press the + button to add a new tab, or the x button to close out the tab you are currently working on. At the start, you should see one tab named * Untitled.")
@@ -44,10 +45,10 @@ class HelpWindow:
                 wrap_text("For the best examples, check out the packs that come with the tool. These utilize a large number of the features present in the tool.")
 
                 with gui.collapsing_header(label="Format & Metadata"):
-                    wrap_text('All packs are either a folder or an archive (.zip or .7z) containing a root level "meta.hjson" file followed by some code. Right now, the "meta.hjson" file doesn\'t do much and just needs to be present for the pack to be detected (If you want, fill in the "name", "desc", and "version" fields with two strings and a number for future versions)')
+                    wrap_text('All packs are either a folder or an archive (.zip or .7z) containing a root level "meta.yaml" file followed by some code. Right now, the "meta.yaml" file doesn\'t do much and just needs to be present for the pack to be detected (If you want, fill in the "name", "desc", and "version" fields with two strings and a number for future versions)')
                     wrap_text('Next to this root meta file are a collection of one or more folders containing assets for a specific "type" that is shown in the Type selection box. Use underscores (instead of spaces) to refer to spaces. Two separate packs may contain the same "type" folder; in that case, the content from that type will be merged (see Load Order & Conflicts for more info)')
-                    wrap_text('Each of these "type" folders must contain a meta.hjson file specifying how to load any content that type provides (See Type Metadata for more info).')
-                    wrap_text('Next to the type meta file are a collection of part folders (once again, use underscores, not spaces) that are generated as selectable options on parts panel according to the rules in the type meta file. Each folder will have a collection of folders/images AND/OR a meta.hjson file defining how to load the images in that folder (See Parts for more info).')
+                    wrap_text('Each of these "type" folders must contain a meta.yaml file specifying how to load any content that type provides (See Type Metadata for more info).')
+                    wrap_text('Next to the type meta file are a collection of part folders (once again, use underscores, not spaces) that are generated as selectable options on parts panel according to the rules in the type meta file. Each folder will have a collection of folders/images AND/OR a meta.yaml file defining how to load the images in that folder (See Parts for more info).')
                 
                 with gui.collapsing_header(label="Type Metadata"):
                     wrap_text('There are 6 main fields in every meta file:')

@@ -7,3 +7,4 @@ asset_builder
 asset_builder.build
 asset_builder.dist
 asset_builder.bin
+asset_builder.onefile-build

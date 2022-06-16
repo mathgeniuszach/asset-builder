@@ -42,6 +42,7 @@ PACKS = Path("packs")
 LOG = Path("log.txt")
 LOG_FORMAT = "[{asctime}] {levelname:<8}  {message}"
 BACKGROUND_COLOR = (37, 37, 38)
+VERSION = 1
 
 SAFETY_LOCK = threading.Lock()
 UPDATE_LOCK = threading.Lock()

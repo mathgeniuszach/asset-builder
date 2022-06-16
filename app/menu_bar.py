@@ -25,8 +25,10 @@ class MenuBar:
                 gui.add_menu_item(label="Prompt on Unsaved Work", tag="unsaved_prompt", check=True, callback=lambda s: self.change_option(s))
                 gui.add_menu_item(label="Autobackup Work", tag="autosave", check=True, callback=lambda s: self.change_option(s))
                 gui.add_menu_item(label="Nearest Scaling", tag="nearest", check=True, callback=lambda s: self.change_option(s))
-            
-            gui.add_menu_item(label="Reload", tag="reload", callback=lambda: load_packs.reload())
+
+            with gui.menu(label="Packs"):
+                gui.add_menu_item(label="List Packs")
+                gui.add_menu_item(label="Reload", tag="reload", callback=lambda: load_packs.reload())
 
             self.help = help_win.HelpWindow()
             gui.add_menu_item(label="Help", callback=lambda: self.help.show())

@@ -2,13 +2,13 @@ from .globals import *
 
 from . import edit_row
 
-import hjson
+import yaml
 import tempfile
 
 nonbutton = None
 
 def find_pack(path: Path):
-    if (path / "meta.hjson").is_file():
+    if (path / "meta.yaml").is_file():
         return path
     
     for p in path.iterdir():
@@ -20,17 +20,28 @@ def find_pack(path: Path):
 def acquire_pack(packs: list, path: Path, name):
     log.info(f'Loading pack "{name}"')
     try:
+        # Locate the pack's meta file, and use that as the root directory
+        # (Since windows likes to archive a pack folder into a zip with an extra directory)
         f: Path = find_pack(path)
-        if f is None: raise ValueError('Could not find "meta.hjson" in pack.')
+        if f is None: raise ValueError('could not find "meta.yaml" in pack.')
 
+        # Do not load packs made for newer versions.
+        meta = f / "meta.yaml"
+        with meta.open() as metafile:
+            ver = yaml.safe_load(metafile).get("for", VERSION)
+            if ver > VERSION:
+                raise ValueError(f'pack is made for newer version of tool (pack: {ver} > tool: {VERSION})')
+
+        # Iterate over types and collect type packs
         for typ in f.iterdir():
-            if typ.is_dir() and (typ / "meta.hjson").is_file():
-                # Load meta.hjson
-                with (typ / "meta.hjson").open("r", encoding="utf-8") as file:
-                    ndata: dict = dict(hjson.load(file))
+            if typ.is_dir() and (typ / "meta.yaml").is_file():
+                # Load meta.yaml
+                with (typ / "meta.yaml").open("r", encoding="utf-8") as file:
+                    ndata: dict = dict(yaml.safe_load(file))
                 packs.append((ndata.get("priority", 0), typ, ndata, name))
-    except Exception:
+    except Exception as e:
         log.warn(f'Failed to load pack "{name}"', exc_info=True)
+        xdialog.warning(message=f'Failed to load pack "{name}";\n{e.__class__.__name__}: {e}')
 
 def reload():
     log.info("Loading packs")
@@ -142,8 +153,9 @@ def reload():
                 for tmp in tmps:
                     shutil.rmtree(tmp)
         
-        except Exception:
+        except Exception as e:
             log.error("Failed to load packs.", exc_info=True)
+            xdialog.error(message=f"Failed to load packs;\n{e.__class__.__name__}: {str(e)}")
         
         # Build gui
         build_gui(G.app.edit_rows)
@@ -177,9 +189,9 @@ def load_part(path: Path, old: dict, size: list[int]):
     log.debug(f'Loading part data at "{path}"')
 
     # Load meta file
-    if (path / "meta.hjson").is_file():
-        with (path / "meta.hjson").open("r", encoding="utf-8") as file:
-            meta = dict(hjson.load(file))
+    if (path / "meta.yaml").is_file():
+        with (path / "meta.yaml").open("r", encoding="utf-8") as file:
+            meta = dict(yaml.safe_load(file))
             # Store as "/meta" key, since files cannot have slashes in name.
             merge_dict(get_dict(old, "/meta", {}), meta)
     
@@ -189,7 +201,7 @@ def load_part(path: Path, old: dict, size: list[int]):
             # Directories are loaded recursively.
             load_part(f, get_dict(old, str(f.name), {}), size)
         elif f.is_file():
-            if f.suffix != ".hjson":
+            if f.suffix != ".yaml":
                 # Files should normally be images, load it like an image, but also handle layers
                 inamez = str(f.stem).split()
                 base = old.get(inamez[0])

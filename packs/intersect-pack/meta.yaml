@@ -1,0 +1,12 @@
+# Name of the pack.
+name: Intersect Assets
+# Description of the pack.
+desc: A collection of character assets part of the MMO Intersect Engine.
+# People who made the pack
+author: Many Authors
+# Link to click on.
+link: https://github.com/AscensionGameDev/Intersect-Assets
+# Version string of the pack.
+version: 1.0.1
+# Number referring to the version of the tool you depend on.
+for: 1

@@ -1,0 +1,126 @@
+# Packs with higher priority have their values prioritized over others.
+# Same priority loads are random; all priorities can be float values.
+# Default priority is 0.
+priority: 1
+
+# Width x Height in pixels. Any images that do not match this size in the pack will be ignored.
+# The default value is 256x256 pixels.
+size: [96, 128]
+
+# Checkboxes, for providing basic options on ordering and filters. 
+checkboxes:
+    copy_middle: Copy middle row to left?
+    ears_over: Ears over Accessories?
+    shirt_in_pants: Shirt tucked into pants?
+    pants_in_boots: Pants tucked into boots?
+
+
+# Defaultly selected parts
+default:
+    parts:
+        Body: Human
+        Arms: Normal
+        Eyes: Human_1
+    checkboxes:
+        copy_middle: true
+        pants_in_boots: true
+    
+
+# Items with higher priority show up on top.
+# Items with the same priority are organized alphabetically.
+draw_order:
+    Body: 0
+    Eyes: 1
+    Arms: 10
+    
+    Shirt:
+        type: checkbox
+        id: shirt_in_pants
+        true: 13
+        false: 16
+    
+    Pants: 15
+    Boots:
+        type: checkbox
+        id: pants_in_boots
+        true: 17
+        false: 14
+    
+    Shoulders: 40
+    Waist: 41
+    Gloves: 42
+    
+    Hair: 45
+    Facial_Hair: 46
+    
+    Ears:
+        type: checkbox
+        id: ears_over
+        true: 101
+        false: 50
+    
+    Tail:
+        type: cut_h
+        y: 96
+        before: -1
+        after: 60
+    
+    # The left hand item shows up on top of the right hand item at <64 pixels, but below that, the right hand item shows up on top.
+    Left_Hand: 25
+    Right_Hand:
+        type: cut_h
+        y: 64
+        before: 24
+        after: 26
+    
+    Accessories: 100
+
+# Groups specify how to organize sections of selectables. Groups are organized alphabetically.
+# Unlike the other two parts, higher priority packs get their names shown up first.
+groups:
+    000_main:
+        - Body
+        - Arms
+        - Eyes
+    100_hair:
+        - Hair
+        - Facial_Hair
+    200_clothes:
+        - Shirt
+        - Pants
+        - Boots
+    300_exparts:
+        - Ears
+        - Tail
+    400_exclothes:
+        - Shoulders
+        - Waist
+        - Gloves
+    500_hold: 
+        - Left_Hand
+        - Right_Hand
+    900_extra: 
+        - Accessories
+
+# Effects applied to the image after everything is complete.
+# Priority of each filter determines the order filters are applied in.
+# Smaller numbers are applied first; priority defaults to 0.
+filters:
+# If specified, referrs to a checkbox that must be checked for the filter to be applied.
+  - if: copy_middle
+    priority: 100 # This should be applied after everything else
+    type: multiple
+    filters:
+        # First, we add a 32 pixel column on the left.
+      - type: rebox
+        size: [128, 128]
+        offset: [32, 0]
+        # Next, we copy the middle row into that 32 pixel column.
+      - type: copy
+        image:
+            # The image field copies the given image and asks for filters to apply on it.
+            # After applying all the filters on the copy,
+            # it then pastes the copy back on the original image.
+          - type: crop
+            box: [64, 0, 96, 128]
+        pos: [0, 0]
