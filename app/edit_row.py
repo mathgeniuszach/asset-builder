@@ -279,6 +279,7 @@ class EditRow:
 
         self.depends = part["/depends"]
         self.dependents = part["/dependents"]
+        self.curr_choices = set()
         self.curr_counts = {}
 
         # Get choices list
@@ -326,6 +327,7 @@ class EditRow:
     
     def set_combo(self, color_counts, choices, update=True):
         self.curr_counts = color_counts
+        self.curr_choices = set(choices)
         
         gui.configure_item(self.combo, items=choices)
 

@@ -1,5 +1,4 @@
 from .globals import *
-from . import dialog
 
 import msgpack
 
@@ -66,6 +65,7 @@ class TabBar:
         active: dict = G.data[gui.get_value("tabs")]
         G.active = active
 
+        # Update type
         gui.set_value("type", active.get("type", ""))
         G.app.selector.change_type()
     

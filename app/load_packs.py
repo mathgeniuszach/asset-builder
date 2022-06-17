@@ -17,7 +17,7 @@ def find_pack(path: Path):
     
     return None
 
-def acquire_pack(packs: list, path: Path, name):
+def acquire_pack(packs: list, typepacks: list, path: Path, name):
     log.info(f'Loading pack "{name}"')
     try:
         # Locate the pack's meta file, and use that as the root directory
@@ -28,17 +28,22 @@ def acquire_pack(packs: list, path: Path, name):
         # Do not load packs made for newer versions.
         meta = f / "meta.yaml"
         with meta.open() as metafile:
-            ver = yaml.safe_load(metafile).get("for", VERSION)
+            metadata = yaml.safe_load(metafile)
+            ver = metadata.get("for", VERSION)
             if ver > VERSION:
                 raise ValueError(f'pack is made for newer version of tool (pack: {ver} > tool: {VERSION})')
+        
+        # Save the metadata to be shown later
+        packs.append(metadata)
 
         # Iterate over types and collect type packs
         for typ in f.iterdir():
-            if typ.is_dir() and (typ / "meta.yaml").is_file():
-                # Load meta.yaml
-                with (typ / "meta.yaml").open("r", encoding="utf-8") as file:
-                    ndata: dict = dict(yaml.safe_load(file))
-                packs.append((ndata.get("priority", 0), typ, ndata, name))
+            if typ.stem.replace("_", "").strip():
+                if typ.is_dir() and (typ / "meta.yaml").is_file():
+                    # Load meta.yaml
+                    with (typ / "meta.yaml").open("r", encoding="utf-8") as file:
+                        ndata: dict = dict(yaml.safe_load(file))
+                    typepacks.append((ndata.get("priority", 0), typ, ndata, name))
     except Exception as e:
         log.warn(f'Failed to load pack "{name}"', exc_info=True)
         xdialog.warning(message=f'Failed to load pack "{name}";\n{e.__class__.__name__}: {e}')
@@ -53,7 +58,8 @@ def reload():
         types = G.types
         types.clear()
 
-        packs: list[tuple[float, Path, bool, dict]] = []
+        typepacks: list[tuple[float, Path, bool, dict]] = []
+        packs: list[dict] = []
 
         try:
             # Ensure that packs folder exists
@@ -68,7 +74,7 @@ def reload():
                     if f.is_dir():
                         # If the pack is a directory, get it directly
                         log.debug(f'Discovered unzipped pack {f.name}')
-                        acquire_pack(packs, f, f.name)
+                        acquire_pack(packs, typepacks, f, f.name)
                     elif f.is_file():
                         # The pack is a file, it must be an archive of some kind.
                         # We'll extract it using shutil temporarily. use acquire_pack on it, then delete it.
@@ -77,7 +83,7 @@ def reload():
                             tmps.append(tmp)
                             shutil.unpack_archive(str(f.absolute()), tmp)
                             log.debug(f'Discovered zipped pack {f.name}')
-                            acquire_pack(packs, Path(tmp), f.name)
+                            acquire_pack(packs, typepacks, Path(tmp), f.name)
                         except Exception:
                             log.warn(f'Unknown pack "{f.name}"', exc_info=True)
                 
@@ -85,10 +91,10 @@ def reload():
                 # Sort it so high priority loads first
                 # (nothing will be able to overwrite previous values, so this is faster)
                 log.info("Merging packs")
-                packs.sort(key=lambda v: v[0], reverse=True)
+                typepacks.sort(key=lambda v: v[0], reverse=True)
 
                 # First pass for metadata.
-                for _, typ, tdata, packname in packs:
+                for _, typ, tdata, packname in typepacks:
                     try:
                         tname = str(typ.name).replace("_", " ")
                         old = get_dict(types, tname, {"draw_order": {}, "default": {}, "checkboxes": {}, "groups": {}, "parts": {}, "filters": []})
@@ -121,7 +127,7 @@ def reload():
                         log.error(f'Failed to load metadata for type "{tname}" in pack {packname}', exc_info=True)
                 
                 # Second pass for parts.
-                for _, typ, tdata, packname in packs:
+                for _, typ, tdata, packname in typepacks:
                     try:
                         tname = str(typ.name).replace("_", " ")
                         old = types[tname]
@@ -158,6 +164,7 @@ def reload():
             xdialog.error(message=f"Failed to load packs;\n{e.__class__.__name__}: {str(e)}")
         
         # Build gui
+        G.app.packs.build(packs)
         build_gui(G.app.edit_rows)
 
         # Load auto-save data
@@ -262,6 +269,9 @@ def load_part(path: Path, old: dict, size: list[int]):
 
 def build_gui(edit_rows):
     log.debug("Building GUI")
+
+    # Clear the edit row cache for choices
+    edit_row.EditRow.CHOICE_CACHE.clear()
 
     # Insert types into combo box
     stypes = sorted(G.types.keys())

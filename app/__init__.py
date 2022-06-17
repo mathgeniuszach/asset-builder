@@ -46,6 +46,11 @@ class App:
         
         # Window elements
         with win:
+            # Helps and packs windwos
+            log.debug("Loading help and packs windows")
+            self.help = help_win.HelpWindow()
+            self.packs = packs_win.PacksWindow()
+
             # Nonbutton
             self.nonbutton = gui.add_button(label="", show=False)
 
@@ -125,5 +130,7 @@ from . import load_packs
 from . import edit_row
 from . import image
 from . import selector
+from . import help_win
+from . import packs_win
 
 from typing import Union

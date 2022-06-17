@@ -20,18 +20,19 @@ class TypeSelector:
             gui.hide_item(f"parts/{G.active_type}")
         
         G.active_type = ntype
-        G.active["type"] = ntype
 
         if ntype:
             gui.show_item(f"parts/{ntype}")
-            if not otype:
-                # Load defaults if switching from null type
+            # Load defaults if no type was previously selected
+            if not G.active["type"]:
                 d = G.types[ntype]["default"]
                 merge_dict(G.active["parts"], d.get("parts", {}))
                 merge_dict(G.active["checkboxes"], d.get("checkboxes", {}))
 
             # Parse any data in the "active" section, filling in as many fields as possible
             self.load_data()
+        
+        G.active["type"] = ntype
         
         # Tell the app to redraw stuff
         G.app.change()
@@ -42,6 +43,8 @@ class TypeSelector:
             gui.set_value("check/"+id, G.active["checkboxes"].get(id, False))
 
         # Load editable rows
+        gparts: dict = G.active["parts"]
+        gcolors: dict = G.active["colors"]
         for item, row in G.app.edit_rows[G.active_type].items():
             try:
                 # Load choices, without updating data
@@ -50,11 +53,21 @@ class TypeSelector:
                 # Load values
                 if isinstance(row, edit_row.EditRow):
                     # Single edit row, load single value into combo
-                    gui.set_value(row.combo, G.active["parts"].get(item, "").replace("_", " "))
+                    # First ensure that key exists
+                    v = gparts.get(item, "").replace("_", " ")
+                    vs = row.curr_choices
+                    if v not in vs:
+                        xv = translate(v, vs)
+                        if xv:
+                            v = xv
+                            gparts[item] = xv
+
+                    # Then set value
+                    gui.set_value(row.combo, v)
                     row.change_combo(False)
                 else:
                     # Multiple, load list instead into many combos
-                    vals = G.active["parts"].get(item)
+                    vals = gparts.get(item)
                     old_to_new = False
                     if not vals or type(vals) != list:
                         if type(vals) == str:
@@ -62,16 +75,16 @@ class TypeSelector:
                             vals = [vals]
                         else:
                             vals = [""]
-                        G.active["parts"][item] = vals
+                        gparts[item] = vals
                     
-                    colors = G.active["colors"].get(item)
+                    colors = gcolors.get(item)
                     if not colors or type(colors) != list:
                         if old_to_new:
                             colors = [colors]
                         else:
                             colors = [[]]
                             
-                        G.active["colors"][item] = colors
+                        gcolors[item] = colors
                     
                     # Ensure that active length and current row count is the same
                     nl = len(vals)
@@ -87,10 +100,85 @@ class TypeSelector:
                             row.edit_rows[1].remove(False)
                     
                     # Load the value and color into every edit row
+                    vs = row.edit_rows[0].curr_choices
                     for n, r in enumerate(row.edit_rows):
-                        # Value
-                        gui.set_value(r.combo, vals[n].replace("_", " "))
+                        # First ensure that key exists
+                        v = vals[n].replace("_", " ")
+                        if v not in vs:
+                            xv = translate(v, vs)
+                            if xv:
+                                v = xv
+                                vals[n] = xv
+                        
+                        # Then set value
+                        gui.set_value(r.combo, v)
                         r.change_combo(False)
 
             except Exception:
                 log.warn(f'Failed to load combo(s) for "{G.active_type}/{row.item}"', exc_info=True)
+
+# Translate names like "{Asset}", "{Asset}_1", and "{Asset}_1A" into each other.
+def translate(name: str, items: set):
+    # No need to translate if the name exists in options.
+    if name in items: return name
+    if not name: return ''
+
+    # Acquire number and letter suffix if they exist
+    sname = name.split()
+    if len(sname) == 1:
+        # No suffix, check if one with starting suffix does exist
+        if name + "_1"  in items: return name + "_1"
+        if name + "_A"  in items: return name + "_A"
+        if name + "_1A" in items: return name + "_1A"
+    else:
+        suffix = sname[-1]
+        if suffix[-1].isalpha():
+            if len(suffix) == 1:
+                # In the form {Asset}_L
+                bname = ''.join(sname[:-1])
+                l = suffix[-1].upper()
+
+                # Check for {Asset}_1L
+                if bname + "_1" + l in items: return bname + "_1" + l
+                # If form is {Asset}_A, Check for {Asset}
+                if l == 'A' and bname in items: return bname
+            elif suffix[:-1].isdigit():
+                # In the form {Asset}_#L
+                bname = ''.join(sname[:-1])
+                num = int(suffix[:-1])
+                l = suffix[-1].upper()
+
+                if num == 1:
+                    # In the form is {Asset}_1L
+                    # If form is {Asset}_1A, Check for {Asset}
+                    if l == 'A' and bname in items: return bname
+                    # Check for {Asset}_L
+                    if bname + "_" + l in items: return bname + "_" + l
+                elif l == 'A':
+                    # In the form {Asset}_#A
+                    # Check for {Asset}_#
+                    if bname + "_" + str(num) in items: return bname + "_" + str(num)
+            else:
+                # No suffix, check if one with starting suffix does exist
+                if name + "_1"  in items: return name + "_1"
+                if name + "_A"  in items: return name + "_A"
+                if name + "_1A" in items: return name + "_1A"
+                    
+        elif suffix.isdigit():
+            # In the form {Asset}_#
+            # Check for {Asset}_#A
+            if name + "A" in items: return name + "A"
+
+            bname = ''.join(sname[:-1])
+            num = int(suffix)
+
+            # If form is {Asset}_1, Check for {Asset}
+            if num == 1 and bname in items: return bname
+        else:
+            # No suffix, check if one with starting suffix does exist
+            if name + "_1"  in items: return name + "_1"
+            if name + "_A"  in items: return name + "_A"
+            if name + "_1A" in items: return name + "_1A"
+    
+    # If we can't find anything, return give up signal
+    return ''

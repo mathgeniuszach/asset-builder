@@ -44,13 +44,15 @@ class HelpWindow:
                 wrap_text("So your curious about making asset packs, eh?")
                 wrap_text("For the best examples, check out the packs that come with the tool. These utilize a large number of the features present in the tool.")
 
-                with gui.collapsing_header(label="Format & Metadata"):
+                gap(1)
+                with gui.tree_node(label="Format & Metadata"):
                     wrap_text('All packs are either a folder or an archive (.zip or .7z) containing a root level "meta.yaml" file followed by some code. Right now, the "meta.yaml" file doesn\'t do much and just needs to be present for the pack to be detected (If you want, fill in the "name", "desc", and "version" fields with two strings and a number for future versions)')
                     wrap_text('Next to this root meta file are a collection of one or more folders containing assets for a specific "type" that is shown in the Type selection box. Use underscores (instead of spaces) to refer to spaces. Two separate packs may contain the same "type" folder; in that case, the content from that type will be merged (see Load Order & Conflicts for more info)')
                     wrap_text('Each of these "type" folders must contain a meta.yaml file specifying how to load any content that type provides (See Type Metadata for more info).')
                     wrap_text('Next to the type meta file are a collection of part folders (once again, use underscores, not spaces) that are generated as selectable options on parts panel according to the rules in the type meta file. Each folder will have a collection of folders/images AND/OR a meta.yaml file defining how to load the images in that folder (See Parts for more info).')
                 
-                with gui.collapsing_header(label="Type Metadata"):
+                gap(1)
+                with gui.tree_node(label="Type Metadata"):
                     wrap_text('There are 6 main fields in every meta file:')
                     gap(2)
 
@@ -74,14 +76,16 @@ class HelpWindow:
 
                     wrap_text('Finally, is the "filters" field, which is a list of post-processing effects you can apply to the image to change it\'s size or something about the image (See Filters for more info). Root level filters additionally have their own "priority" field that is separate from the main one; smaller priority values make the filter be applied first. Priority defaults to 0.')
                 
-                with gui.collapsing_header(label="Parts"):
+                gap(1)
+                with gui.tree_node(label="Parts"):
                     wrap_text('Perhaps the most important part about any pack are the parts. Each part folder may contain both a meta file and either a collection of folders or images that are available as choices in that part field\'s dropdown selector.')
                     wrap_text('The meta file is optional, and does not need to be provided. But it does have a few options. If "disabled" is set to True, that part will not be loaded. If "multiple" is set to True, multiple of that part can be selected in the tool. If "color" is set to a different part, this part will not have it\'s own color options, but leech off of this part instead. If "depends" is set to True, switch to depend mode; otherwise, use normal mode.')
                     gap(2)
                     wrap_text('In normal mode, there should be no sub-folders in the part folder. Rather, all should be images. Each image should be a name in the format "Part_Name.png". To specify additional layers on top of the image (each which can have their own color), use the form "Part_Name overlay.png", "Part_Name overlay2.png" or "Part_Name overlay3.png". There\'s a maximum of 4 layers available.')
                     wrap_text('In depend mode, either use folders or images for each of the part names that you can select in the "depends" type. Inside of each of those folders, refer to "normal" mode. These sub-folders can have meta files, which can only have the "depends" and "color" fields. Note that the "color" field must be present in the same folder as an image to be used there.')
                 
-                with gui.collapsing_header(label="Filters"):
+                gap(1)
+                with gui.tree_node(label="Filters"):
                     wrap_text('Filters (that is, those in the filters field), accept an "if" field that refers to a checkbox that must be set in order to work, as well as a type field and other type-specific fields. Here\'s a list of type fields as well as their type specific fields:')
                     gap(2)
 
@@ -114,7 +118,8 @@ class HelpWindow:
                     wrap_text('The "enhance" filter applies an enhancement filter to the entire image. Specify a "mode" ("color", "contrast", "brightness", or "sharpness"), then either a "level" (0-2, 1 means do nothing) or a "factor" (0-inf, 1 means do nothing). Negative values might work too.')
                     gap(2)
                 
-                with gui.collapsing_header(label="Load Order & Conflicts"):
+                gap(1)
+                with gui.tree_node(label="Load Order & Conflicts"):
                     wrap_text("For maximum extensibility, multiple asset packs can provide assets for the same type; thus, conflicts may occur. In general, packs who mark their types with higher priorities have their values prioritized over others.")
                     gap(4)
 
@@ -131,12 +136,17 @@ class HelpWindow:
                     wrap_text("Folders with the same name are always merged and act as if they are from the same pack.")
                     wrap_text("If an image would end up in the same location as another image, the image from the pack with the highest priority is used.")
                     wrap_text("Part metadata is merged from each pack; if a field is specified in muliple packs, the value from the pack with the highest priority is used.")
-            
+                
+                gap(1)
+
             with gui.collapsing_header(label="Quick Tips"):
                 wrap_text("Saving an image saves both the image and the options you have selected (so it can be reloaded into the tool), while exporting a file saves only the image (so it cannot be reloaded).")
                 wrap_text("You can Ctrl+Click on a slider (like Brightness, etc.) to set it's value directly. You can set some values outside their minimum and maximum this way for interesting effects.")
                 wrap_text("Right click on a color box to reset it's settings to the default values.")
                 wrap_text("Priority values in a pack can be positive or negative, and also support float values.")
+                wrap_text('When you add an asset of a name like "{Asset}_2" into your pack, rename the original "{Asset}" to "{Asset}_1". This will not break compatibility, as internally the names "{Asset}" and "{Asset}_1" are translated into each other. Same thing with "{Asset}_1" and "{Asset}_1A", and "{Asset}_2" and "{Asset}_2A".')
+                wrap_text('When non-descriptively naming things in a pack, use numbers first, then capitalized letters. So do "{Asset}_2A" or "{Asset}_2", not "{Asset}_A2". Names like "{Asset}_B" are fine, and mean "{Asset}_1B".')
+                wrap_text('Letters only go from A-Z in packs, while numbers up to any value may be used.')
             
             with gui.collapsing_header(label="About"):
                 wrap_text("Asset Builder - mathgeniuszach (Zach K)")
@@ -144,11 +154,6 @@ class HelpWindow:
                     gui.add_button(label="Source Code", callback=lambda: webbrowser.open(GITHUB)),
                     G.app.hyper_theme
                 )
-                gui.bind_item_theme(
-                    gui.add_button(label="Discord", callback=lambda: webbrowser.open(DISCORD)),
-                    G.app.hyper_theme
-                )
-                wrap_text("Github Page")
     
     def show(self):
         gui.show_item("help")

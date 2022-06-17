@@ -1,14 +1,6 @@
 from .globals import *
 
 from . import load_packs
-from . import help_win
-
-def wrap(m, **kw):
-    def x(sender, app_data, user_data, *args, **kwargs):
-        m(*args, **kw, **kwargs)
-        gui.hide_item("file_menu")
-    
-    return x
 
 class MenuBar:
     def __init__(self):
@@ -27,11 +19,10 @@ class MenuBar:
                 gui.add_menu_item(label="Nearest Scaling", tag="nearest", check=True, callback=lambda s: self.change_option(s))
 
             with gui.menu(label="Packs"):
-                gui.add_menu_item(label="List Packs")
+                gui.add_menu_item(label="List Packs", tag="list-packs", callback=lambda: G.app.packs.show())
                 gui.add_menu_item(label="Reload", tag="reload", callback=lambda: load_packs.reload())
 
-            self.help = help_win.HelpWindow()
-            gui.add_menu_item(label="Help", callback=lambda: self.help.show())
+            gui.add_menu_item(label="Help", callback=lambda: G.app.help.show())
 
             gui.add_menu_item(label="Discord", callback=lambda: webbrowser.open(DISCORD))
 

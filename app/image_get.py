@@ -10,10 +10,8 @@ def get_pnum(p, item, size):
             ptype = p["type"]
             if ptype == "checkbox":
                 # Checkbox changes priority
-                if G.active["checkboxes"].get(p["id"], False):
-                    return get_pnum(p["true"], item, size)
-                else:
-                    return get_pnum(p["false"], item, size)
+                checked = G.active["checkboxes"].get(p["id"], False)
+                return get_pnum(p[checked], item, size)
             elif ptype == "cut_v" or ptype == "cut_h":
                 # Cut image into boxes based on line
                 before = get_pnum(p["before"], item, size)
@@ -57,7 +55,7 @@ def get_pnum(p, item, size):
                 
                 return out
         except Exception:
-            log.error(f'Invalid priority conditional for "{item}", assuming -1')
+            log.error(f'Invalid priority conditional for "{item}", assuming -1', exc_info=True)
             return -1
     else:
         # Just a number
@@ -142,7 +140,7 @@ def colorize_image(image: Image.Image, color):
 
 def get_im(part, k):
     if k is None: return None
-    return part.get(k) or part.get(k + "_1") or part.get("_")
+    return part.get(k) or part.get("_")
 
 def get_image(parts, item):
     active = G.active["parts"]
