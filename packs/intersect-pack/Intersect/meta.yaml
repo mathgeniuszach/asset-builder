@@ -9,7 +9,7 @@ size: [96, 128]
 
 # Checkboxes, for providing basic options on ordering and filters. 
 checkboxes:
-    copy_middle: Copy middle row to left?
+    copy_middle: Copy middle column to left?
     ears_over: Ears over Accessories?
     shirt_in_pants: Shirt tucked into pants?
     pants_in_boots: Pants tucked into boots?
