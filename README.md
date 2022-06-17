@@ -11,3 +11,11 @@ Head over to the releases page to get the program for yourself, or launch the sc
 pip install -r requirements.txt
 python asset_builder.py
 ```
+
+## Building Nuitka Executable
+
+If you want to build an executable for yourself based on the python script, use:
+```
+python build.py
+```
+Note that after building, the "i" folder and the "packs" folder should be included next to the executable to properly use the tool.
