@@ -136,8 +136,9 @@ def reload():
 
                         # Process parts
                         for part in typ.iterdir():
+                            out = get_dict(old["parts"], str(part.name), {})
                             if part.is_dir():
-                                load_part(part, get_dict(old["parts"], str(part.name), {}), old["size"])
+                                load_part(part, out, old["size"])
                     except Exception:
                         log.error(f'Failed to load parts for type "{tname}" in pack {packname}', exc_info=True)
 
@@ -310,15 +311,16 @@ def build_gui(edit_rows):
                                 loaded.add(item)
 
                                 # Build edit rows based on items
-                                part = parts[item]
-                                meta = part.get("/meta", {})
-                                if not meta.get("disabled"):
-                                    if meta.get("multiple", False):
-                                        log.debug(f'Building multi edit "{item}"')
-                                        trows[item] = edit_row.MultiEditRow(typ, item, part)
-                                    else:
-                                        log.debug(f'Building single edit "{item}"')
-                                        trows[item] = edit_row.EditRow(typ, item, part)
+                                if item in parts:
+                                    part = parts[item]
+                                    meta = part.get("/meta", {})
+                                    if not meta.get("disabled"):
+                                        if meta.get("multiple", False):
+                                            log.debug(f'Building multi edit "{item}"')
+                                            trows[item] = edit_row.MultiEditRow(typ, item, part)
+                                        else:
+                                            log.debug(f'Building single edit "{item}"')
+                                            trows[item] = edit_row.EditRow(typ, item, part)
                             except Exception:
                                 log.warn(f'Failed to build GUI for "{typ}/{item}"', exc_info=True)
 
