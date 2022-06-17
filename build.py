@@ -22,7 +22,6 @@ opts = (
     "--nofollow-import-to=Qt5",
     "--nofollow-import-to=PyQt5",
     "--nofollow-import-to=curses",
-    "--nofollow-import-to=email",
 
     "--noinclude-custom-mode=PySide2:nofollow",
     "--noinclude-custom-mode=PySide5:nofollow",
@@ -30,7 +29,6 @@ opts = (
     "--noinclude-custom-mode=Qt5:nofollow",
     "--noinclude-custom-mode=PyQt5:nofollow",
     "--noinclude-custom-mode=curses:nofollow",
-    "--noinclude-custom-mode=email:nofollow",
 )
 
 SYSTEM = platform.system()
