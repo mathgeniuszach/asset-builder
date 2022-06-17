@@ -1,0 +1,7 @@
+xdialog
+dearpygui
+PyYAML
+pillow
+numpy
+py7zr
+msgpack
