@@ -10,32 +10,37 @@ import shutil
 
 from pathlib import Path
 
+opts = (
+    "asset_builder.py",
+    "--standalone", "--onefile",
+
+    "--enable-plugin=numpy",
+
+    "--nofollow-import-to=PySide2",
+    "--nofollow-import-to=PySide5",
+    "--nofollow-import-to=PySide6",
+    "--nofollow-import-to=Qt5",
+    "--nofollow-import-to=PyQt5",
+    "--nofollow-import-to=curses",
+    "--nofollow-import-to=email",
+
+    "--noinclude-custom-mode=PySide2:nofollow",
+    "--noinclude-custom-mode=PySide5:nofollow",
+    "--noinclude-custom-mode=PySide6:nofollow",
+    "--noinclude-custom-mode=Qt5:nofollow",
+    "--noinclude-custom-mode=PyQt5:nofollow",
+    "--noinclude-custom-mode=curses:nofollow",
+    "--noinclude-custom-mode=email:nofollow",
+)
 
 SYSTEM = platform.system()
-if SYSTEM == "Linux":
+if SYSTEM == "Windows":
     subprocess.call((
-        "nuitka3", "asset_builder.py",
-        "--standalone", "--onefile", "--clang",
-
-        "--enable-plugin=numpy",
-
-        "--nofollow-import-to=PySide2",
-        "--nofollow-import-to=PySide5",
-        "--nofollow-import-to=PySide6",
-        "--nofollow-import-to=Qt5",
-        "--nofollow-import-to=PyQt5",
-        "--nofollow-import-to=curses",
-        "--nofollow-import-to=email",
-
-        "--noinclude-custom-mode=PySide2:nofollow",
-        "--noinclude-custom-mode=PySide5:nofollow",
-        "--noinclude-custom-mode=PySide6:nofollow",
-        "--noinclude-custom-mode=Qt5:nofollow",
-        "--noinclude-custom-mode=PyQt5:nofollow",
-        "--noinclude-custom-mode=curses:nofollow",
-        "--noinclude-custom-mode=email:nofollow",
-    ), shell=False)
-elif SYSTEM == "Windows":
-    ...
+        "nuitka", *opts,
+        "--windows-icon-from-ico=i\\icon-large.ico",
+        "--windows-disable-console"
+    ), shell=True)
 else:
-    print("Dunno how to build for this system.")
+    subprocess.call((
+        "nuitka3", *opts, "--clang"
+    ), shell=False)
