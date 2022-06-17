@@ -52,8 +52,8 @@ class MenuBar:
     
     def key_press(self, key):
         if key not in self.keys:
-            if gui.is_key_down(gui.mvKey_Control):
-                if gui.is_key_down(gui.mvKey_Shift):
+            if gui.mvKey_LControl in self.keys or gui.mvKey_RControl in self.keys:
+                if gui.mvKey_LShift in self.keys or gui.mvKey_RShift in self.keys:
                     if key == gui.mvKey_S:
                         self.file_button("save_as")
                 else:
@@ -65,6 +65,7 @@ class MenuBar:
                         self.file_button("export")
                     elif key == gui.mvKey_W:
                         self.file_button("close")
+            
             self.keys.add(key)
 
     def key_release(self, key):
@@ -76,9 +77,6 @@ class MenuBar:
         elif sender == "save_as":   G.app.tab_bar.save_tab(save_as=True)
         elif sender == "export":    G.app.tab_bar.save_tab(save_as=True, no_load=True)
         elif sender == "close":     G.app.tab_bar.close_tab()
-
-        gui.hide_item("file_menu")
-        gui.show_item("file_menu")
     
     def change_option(self, sender):
         self.opts[sender] = gui.get_value(sender)
