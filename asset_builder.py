@@ -19,8 +19,7 @@ def main():
 
         log.info("Finished initialization")
         try:
-            while gui.is_dearpygui_running():
-                gui.render_dearpygui_frame()
+            gui.start_dearpygui()
         finally:
             log.info("Exiting")
             gui.destroy_context()
@@ -29,7 +28,6 @@ def main():
         return 0
     except Exception as e:
         log.error("An unknown error occurred.", exc_info=True)
-        print(f"An unknown error occurred and the program must exit;\n{e.__class__.__name__}: {str(e)}")
         xdialog.error(message=f"An unknown error occurred and the program must exit;\n{e.__class__.__name__}: {str(e)}")
         return 1
     except KeyboardInterrupt:

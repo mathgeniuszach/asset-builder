@@ -54,8 +54,8 @@ class ImageStacker:
                 )
                 self.zoom_label = gui.add_text("")
 
-                self.bgtex = gui.add_raw_texture(0, 0, numpy.array([]), parent="texreg")
-                self.fgtex = gui.add_raw_texture(0, 0, numpy.array([]), parent="texreg")
+                self.bgtex = gui.add_raw_texture(1, 1, numpy.array([0,0,0,0], dtype=numpy.float32), parent="texreg")
+                self.fgtex = gui.add_raw_texture(1, 1, numpy.array([0,0,0,0], dtype=numpy.float32), parent="texreg")
                 self.bg = gui.add_image(self.bgtex, pos=(5, 40), parent="imagewin", before="zoombar", show=False)
                 self.fg = gui.add_image(self.fgtex, pos=(5, 40), parent="imagewin", before="zoombar", show=False)
                 gui.bind_item_handler_registry(self.fg, self.ph)
