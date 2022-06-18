@@ -51,7 +51,7 @@ draw_order:
     Gloves: 42
     
     Hair: 45
-    Facial_Hair: 46
+    # Facial_Hair: 46
     
     Ears:
         type: checkbox
