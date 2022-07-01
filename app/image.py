@@ -28,7 +28,7 @@ class ImageStacker:
     ZOOM_PART = ZOOM_WIDTH / len(ZOOM_LEVELS)
 
     def __init__(self):
-        self.size = (0, 0)
+        self.size = None
         self.zoom = 2
         self.pan = (0, 0)
         self.scroll = (0, 0)
@@ -42,7 +42,7 @@ class ImageStacker:
         with gui.item_handler_registry() as self.ph:
             gui.add_item_clicked_handler(callback=lambda: self.start_pan(), button=0)
 
-        with gui.child_window(width=-1, height=-2) as self.cwin:
+        with gui.child_window(width=-1, height=-2):
             with gui.group(tag="zoombar", horizontal=True):
                 self.zoomer = gui.add_slider_int(
                     min_value=0,
@@ -54,10 +54,15 @@ class ImageStacker:
                 )
                 self.zoom_label = gui.add_text("")
 
+                # gui.add_spacer(width=40)
+                # gui.add_text("Animation:")
+                # self.animation = gui.add_combo([], width=-1)
+            
+            with gui.child_window(width=-1, pos=(0, 40), border=False) as self.cwin:
                 self.bgtex = gui.add_raw_texture(1, 1, numpy.array([0,0,0,0], dtype=numpy.float32), parent="texreg")
                 self.fgtex = gui.add_raw_texture(1, 1, numpy.array([0,0,0,0], dtype=numpy.float32), parent="texreg")
-                self.bg = gui.add_image(self.bgtex, pos=(5, 40), parent="imagewin", before="zoombar", show=False)
-                self.fg = gui.add_image(self.fgtex, pos=(5, 40), parent="imagewin", before="zoombar", show=False)
+                self.bg = gui.add_image(self.bgtex, pos=(10, 0), show=False)
+                self.fg = gui.add_image(self.fgtex, pos=(10, 0), show=False)
                 gui.bind_item_handler_registry(self.fg, self.ph)
 
             self.update_zoom()
@@ -76,25 +81,6 @@ class ImageStacker:
 
             # Update image based on zoom
             G.app.change()
-    
-    def update_size(self, zoom, size, data=None):
-        w, h = int(size[0]*zoom), int(size[1]*zoom)
-        if data is None:
-            gui.configure_item(self.bg, show=False)
-            gui.configure_item(self.fg, show=False)
-        else:
-            bgtex = gui.add_raw_texture(w, h, make_checkerboard(w, h).ravel(), parent="texreg")
-            fgtex = gui.add_raw_texture(w, h, data, parent="texreg")
-            gui.configure_item(self.bg, texture_tag=bgtex, width=w, height=h, show=True)
-            gui.configure_item(self.fg, texture_tag=fgtex, width=w, height=h, show=True)
-
-            gui.delete_item(self.bgtex)
-            gui.delete_item(self.fgtex)
-            self.bgtex = bgtex
-            self.fgtex = fgtex
-        
-        with SAFETY_LOCK:
-            self.size = (w, h)
     
     def start_pan(self):
         self.panning = True
@@ -118,20 +104,11 @@ class ImageStacker:
                 gui.set_y_scroll(self.cwin, ny)
                 self.scroll = nx, ny
 
-    def update(self):
-        with SAFETY_LOCK:
-            zoom = self.zoom
-            size = self.size
-
-        # Delete image if different
+    def update_image(self):
+        # Delete image if nothing is selected
         if not G.active_type:
-            nsize = (0, 0)
-        
-            if size != nsize:
-                self.update_size(zoom, nsize)
-            
+            self.size = None
             self.image = None
-            
             return
 
         # Now build the image
@@ -198,30 +175,52 @@ class ImageStacker:
                 # Recursive filter application
                 outimg = apply_filter(outimg, filter, checkboxes)
         
-        # Save outimg for saving to a file
+        # Save outimg for modification later
         self.image = outimg
 
-        # Shrink/grow image to zoom size        
-        w = outimg.width
-        h = outimg.height
-        zw = int(w*zoom)
-        zh = int(h*zoom)
+    def update(self):
+        img = self.image
 
+        if not img:
+            # No image to show, so just hide the image viewer
+            gui.configure_item(self.bg, show=False)
+            gui.configure_item(self.fg, show=False)
+            return
+        
+        with SAFETY_LOCK:
+            zoom = self.zoom
+            zsize = int(self.image.width*zoom), int(self.image.height*zoom)
+        
+        # There is an image to show
+
+        # Cut the image based on animations
+
+        # Zoom the image
         if zoom != 1:
             resample = Image.Resampling.BICUBIC
             if gui.get_value("nearest") and zoom > 1:
                 resample = Image.Resampling.NEAREST
 
-            outimg = outimg.resize(
-                (zw, zh),
-                resample=resample
-            )
+            img = img.resize(zsize, resample=resample)
         
         # Convert img to numpy array
-        out = numpy.divide(numpy.array(outimg, dtype=numpy.float32), 255)
+        data = numpy.divide(numpy.array(img, dtype=numpy.float32), 255)
 
-        # Update image size if necessary
-        if size != (zw, zh):
-            self.update_size(zoom, (w, h), out)
+        # Resize if necessary
+        if self.size == zsize:
+            # Resize not necessary
+            gui.set_value(self.fgtex, data)
         else:
-            gui.set_value(self.fgtex, out)
+            # Resize is necessary
+            self.size = zsize
+            zw, zh = zsize
+
+            bgtex = gui.add_raw_texture(zw, zh, make_checkerboard(zw, zh).ravel(), parent="texreg")
+            fgtex = gui.add_raw_texture(zw, zh, data, parent="texreg")
+            gui.configure_item(self.bg, texture_tag=bgtex, width=zw, height=zh, show=True)
+            gui.configure_item(self.fg, texture_tag=fgtex, width=zw, height=zh, show=True)
+
+            gui.delete_item(self.bgtex)
+            gui.delete_item(self.fgtex)
+            self.bgtex = bgtex
+            self.fgtex = fgtex

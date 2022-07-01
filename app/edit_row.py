@@ -124,8 +124,17 @@ class ColorEditPopup:
     
     def change_color(self):
         color = gui.get_value(self.color_picker)
-        self.edit4.set_color(self.i, color=color)
-        self.get_active()["color"] = color
+
+        active = self.get_active()
+        active["color"] = color
+        if active.get("mode", "?") == "?":
+            # If no color mode is selected, pick one for the user automatically.
+            gui.set_value(self.combo, ColorEditPopup.modes["+"])
+            self.edit4.set_color(self.i, color=color, text="+")
+            active["mode"] = "+"
+        else:
+            self.edit4.set_color(self.i, color=color)
+        
         G.app.change()
     
     def change_slider(self, sender, app_data):

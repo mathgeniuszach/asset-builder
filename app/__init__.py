@@ -1,5 +1,7 @@
 # from dearpygui.demo import show_demo
 
+import ctypes
+
 class App:
     def __init__(self, win):
         G.app = self
@@ -10,6 +12,7 @@ class App:
         log.debug("Loading update thread")
         self.running = True
         self.updates = 0
+        self.animation_updates = 0
         self.updater = threading.Thread(target=self.update)
 
         # Themes
@@ -32,15 +35,18 @@ class App:
             
         with gui.theme() as self.hyper_theme:
             with gui.theme_component(gui.mvButton):
-                gui.add_theme_color(gui.mvThemeCol_Button, [0, 0, 0, 0])
-                gui.add_theme_color(gui.mvThemeCol_ButtonActive, [0, 0, 0, 0])
-                gui.add_theme_color(gui.mvThemeCol_ButtonHovered, [29, 151, 236, 25])
-                gui.add_theme_color(gui.mvThemeCol_Text, [29, 151, 236])
+                gui.add_theme_color(gui.mvThemeCol_Button, (0, 0, 0, 0))
+                gui.add_theme_color(gui.mvThemeCol_ButtonActive, (0, 0, 0, 0))
+                gui.add_theme_color(gui.mvThemeCol_ButtonHovered, (29, 151, 236, 25))
+                gui.add_theme_color(gui.mvThemeCol_Text, (29, 151, 236))
         
         # Font and texture
         log.debug("Loading font")
         with gui.font_registry():
             gui.bind_font(gui.add_font("i/Roboto.ttf", 20))
+            if SYSTEM == "Windows":
+                ctypes.windll.shcore.SetProcessDpiAwareness(2)
+                gui.set_global_font_scale(0.5)
         
         gui.add_texture_registry(tag="texreg")
         
@@ -86,9 +92,15 @@ class App:
         # Tells the side thread to update.
         with UPDATE_LOCK:
             self.updates = 1
+            self.animation_updates = 1
 
         # Mark the active file as "unsaved"
         G.active["saved"] = False
+    
+    def animation_change(self):
+        # Tells the side thread to update the animation
+        with UPDATE_LOCK:
+            self.animation_updates = 1
     
     def update(self):
         while self.running or self.updates:
@@ -113,9 +125,19 @@ class App:
                         
                     # Load image
                     try:
-                        self.img_stack.update()
+                        self.img_stack.update_image()
                     except Exception:
                         log.error("Failed to update active data.", exc_info=True)
+            
+            if self.animation_updates > 0:
+                with RELOAD_LOCK:
+                    with UPDATE_LOCK:
+                        self.animation_updates -= 1
+                    
+                    try:
+                        self.img_stack.update()
+                    except Exception:
+                        log.error("Failed to upload active data.", exc_info=True)
     
     def close(self):
         self.running = False
