@@ -48,7 +48,6 @@ class App:
             gui.bind_font(gui.add_font("i/Roboto.ttf", 20))
             if SYSTEM == "Windows":
                 ctypes.windll.shcore.SetProcessDpiAwareness(2)
-                gui.set_global_font_scale(0.5)
         
         gui.add_texture_registry(tag="texreg")
         
