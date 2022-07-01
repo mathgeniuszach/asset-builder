@@ -22,8 +22,8 @@ def main():
             gui.start_dearpygui()
         finally:
             log.info("Exiting")
-            gui.destroy_context()
             iapp.close()
+            gui.destroy_context()
         
         return 0
     except Exception as e:

@@ -128,50 +128,56 @@ filters:
 # Animations utilize the filtered image.
 # Animations can be merged; types from higher priorities are applied before those from lower priorities.
 animations:
-    # Id for the animation. Use underscores to separate names
+    # Id for the animation. Use underscores to separate names.
     # The label is this id, with title case and underscores replaced with spaces.
     down:
         # Each animation provides multiple "types", each of which work on different image sizes.
         # If no type can be applied, the animation is not applied.
-        types:
-            # The image size required for this type to be applied.
-          - size: [128, 128]
-            # Number of columns by rows to cut the image into for frames
-            grid: [4, 4]
-            # Frame numbers; top left is 0.
-            # In a 4x4 grid, the frames in the first row are 0,1,2,3. The second row is 4,5,6,7. This pattern continues.
-            frames: [0,1,2,3]
-        
-          - size: [96, 128]
-            grid: [3, 4]
-            frames: [1,0,1,2]
+
+        # The image size required for this type to be applied.
+      - size: [128, 128]
+        # Number of columns by rows to cut the image into for frames
+        grid: [4, 4]
+        # Frame numbers; top left is 0.
+        # In a 4x4 grid, the frames in the first row are 0,1,2,3. The second row is 4,5,6,7. This pattern continues.
+        frames: [0,1,2,3]
+        # Delay between each frame in miliseconds. Any delay less than 5 milliseconds is counted as 5 milliseconds.
+        delay: 250
+    
+      - size: [96, 128]
+        grid: [3, 4]
+        frames: [1,0,1,2]
+        delay: 250
     
     left:
-        types:
-          - size: [128, 128]
-            grid: [4, 4]
-            frames: [4,5,6,7]
-        
-          - size: [96, 128]
-            grid: [3, 4]
-            frames: [4,3,4,5]
+      - size: [128, 128]
+        grid: [4, 4]
+        frames: [4,5,6,7]
+        delay: 250
+    
+      - size: [96, 128]
+        grid: [3, 4]
+        frames: [4,3,4,5]
+        delay: 250
     
     right:
-        types:
-          - size: [128, 128]
-            grid: [4, 4]
-            frames: [8,9,10,11]
-        
-          - size: [96, 128]
-            grid: [3, 4]
-            frames: [7,6,7,8]
+      - size: [128, 128]
+        grid: [4, 4]
+        frames: [8,9,10,11]
+        delay: 250
+    
+      - size: [96, 128]
+        grid: [3, 4]
+        frames: [7,6,7,8]
+        delay: 250
     
     up:
-        types:
-          - size: [128, 128]
-            grid: [4, 4]
-            frames: [12,13,14,15]
-        
-          - size: [96, 128]
-            grid: [3, 4]
-            frames: [10,9,10,11]
+      - size: [128, 128]
+        grid: [4, 4]
+        frames: [12,13,14,15]
+        delay: 250
+    
+      - size: [96, 128]
+        grid: [3, 4]
+        frames: [10,9,10,11]
+        delay: 250

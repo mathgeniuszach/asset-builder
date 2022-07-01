@@ -1,3 +1,4 @@
+from pickle import FRAME
 from .globals import *
 
 from .image_get import *
@@ -30,6 +31,9 @@ class ImageStacker:
     def __init__(self):
         self.size = None
         self.zoom = 2
+        self.frame = 0
+        self.subframe = 0
+        self.subframecap = 0
         self.pan = (0, 0)
         self.scroll = (0, 0)
         self.panning = False
@@ -54,9 +58,11 @@ class ImageStacker:
                 )
                 self.zoom_label = gui.add_text("")
 
-                # gui.add_spacer(width=40)
-                # gui.add_text("Animation:")
-                # self.animation = gui.add_combo([], width=-1)
+                gui.add_spacer(width=40)
+
+                with gui.group(tag="animatebar", horizontal=True, show=False):
+                    gui.add_text("Animation:")
+                    self.animation = gui.add_combo([], width=-1, callback=lambda: self.change_animation())
             
             with gui.child_window(width=-1, pos=(0, 40), border=False) as self.cwin:
                 self.bgtex = gui.add_raw_texture(1, 1, numpy.array([0,0,0,0], dtype=numpy.float32), parent="texreg")
@@ -103,6 +109,33 @@ class ImageStacker:
                 gui.set_x_scroll(self.cwin, nx)
                 gui.set_y_scroll(self.cwin, ny)
                 self.scroll = nx, ny
+    
+    def get_animation(self):
+        try:
+            animation = gui.get_value(self.animation).replace(" ", "_").lower()
+            if not animation: return None
+            return G.types[G.active_type]["animations"][animation][tuple(self.image.size)]
+        except Exception:
+            return None
+
+    def change_animation(self):
+        # To keep fluidity when switching animations, the frame and subframe are not reset.
+        # In update(), frame is moduloed, so no issues there.
+        # self.frame = 0
+        # self.subframe = 0
+
+        atype = self.get_animation()
+        if atype:
+            self.subframecap = atype["delay"]
+        G.app.animation_change()
+    
+    def update_animation(self, delta):
+        if self.subframe >= self.subframecap:
+            with FRAME_LOCK:
+                self.frame += 1
+                self.subframe -= self.subframecap
+            G.app.animation_change()
+        self.subframe += delta
 
     def update_image(self):
         # Delete image if nothing is selected
@@ -187,15 +220,36 @@ class ImageStacker:
             gui.configure_item(self.fg, show=False)
             return
         
-        with SAFETY_LOCK:
-            zoom = self.zoom
-            zsize = int(self.image.width*zoom), int(self.image.height*zoom)
-        
         # There is an image to show
+        w, h = self.image.size
 
         # Cut the image based on animations
+        atype = self.get_animation()
+        if atype:
+            frames = atype["frames"]
+            grid = atype["grid"]
+
+            with FRAME_LOCK:
+                self.frame %= len(frames)
+                frame = frames[self.frame]
+
+            w = w / grid[0]
+            h = h / grid[1]
+
+            img = img.crop((
+                int(frame % grid[0] * w),
+                int(frame // grid[1] * h),
+                int(frame % grid[0] * w + w),
+                int(frame // grid[1] * h + h),
+            ))
+
+            w, h = img.size
 
         # Zoom the image
+        with SAFETY_LOCK:
+            zoom = self.zoom
+            zsize = int(w*zoom), int(h*zoom)
+        
         if zoom != 1:
             resample = Image.Resampling.BICUBIC
             if gui.get_value("nearest") and zoom > 1:
@@ -217,6 +271,7 @@ class ImageStacker:
 
             bgtex = gui.add_raw_texture(zw, zh, make_checkerboard(zw, zh).ravel(), parent="texreg")
             fgtex = gui.add_raw_texture(zw, zh, data, parent="texreg")
+            
             gui.configure_item(self.bg, texture_tag=bgtex, width=zw, height=zh, show=True)
             gui.configure_item(self.fg, texture_tag=fgtex, width=zw, height=zh, show=True)
 

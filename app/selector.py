@@ -31,6 +31,18 @@ class TypeSelector:
 
             # Parse any data in the "active" section, filling in as many fields as possible
             self.load_data()
+
+            # Load animation selections into the animate bar
+            animations: dict[str, dict] = G.types[ntype]["animations"]
+            if animations:
+                gui.show_item("animatebar")
+                items = [""]
+                items.extend(k.replace("_", " ").title() for k in animations.keys())
+                gui.configure_item(G.app.img_stack.animation, items=items)
+            else:
+                gui.hide_item("animatebar")
+        else:
+            gui.hide_item("animatebar")
         
         G.active["type"] = ntype
         

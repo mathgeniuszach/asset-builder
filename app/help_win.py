@@ -74,7 +74,10 @@ class HelpWindow:
                     wrap_text('Sixth, is the "groups" field, which tells the tool what parts (and in what order) to generate as selectable dropdowns on the right side. Each group has an id (sorted alphabetically) that determines what order to load the groups in.')
                     gap(2)
 
-                    wrap_text('Finally, is the "filters" field, which is a list of post-processing effects you can apply to the image to change it\'s size or something about the image (See Filters for more info). Root level filters additionally have their own "priority" field that is separate from the main one; smaller priority values make the filter be applied first. Priority defaults to 0.')
+                    wrap_text('Seventh, is the "filters" field, which is a list of post-processing effects you can apply to the image to change it\'s size or something about the image (See Filters for more info). Root level filters additionally have their own "priority" field that is separate from the main one; smaller priority values make the filter be applied first. Priority defaults to 0.')
+                    gap(2)
+
+                    wrap_text('Finally, is the "animations" field, which is a list of post-post-processing effects which slice up the image into sections and animate the image. Animations must match a certain size of the image to work properly.')
                 
                 gap(1)
                 with gui.tree_node(label="Parts"):

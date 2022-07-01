@@ -6,7 +6,7 @@ from app import App
 from collections import OrderedDict
 import dearpygui.dearpygui as gui
 from pathlib import Path
-from time import sleep
+from time import sleep, process_time_ns
 
 from sys import stdout
 
@@ -47,6 +47,7 @@ VERSION = 1
 SAFETY_LOCK = threading.Lock()
 UPDATE_LOCK = threading.Lock()
 RELOAD_LOCK = threading.Lock()
+FRAME_LOCK = threading.Lock()
 
 class NullWriter:
     def write(self, _): pass

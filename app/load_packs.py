@@ -97,7 +97,7 @@ def reload():
                 for _, typ, tdata, packname in typepacks:
                     try:
                         tname = str(typ.name).replace("_", " ")
-                        old = get_dict(types, tname, {"draw_order": {}, "default": {}, "checkboxes": {}, "groups": {}, "parts": {}, "filters": []})
+                        old = get_dict(types, tname, {"draw_order": {}, "default": {}, "checkboxes": {}, "groups": {}, "parts": {}, "filters": [], "animations": {}})
 
                         # Process metadata
                         for k in ("draw_order", "checkboxes"):
@@ -120,9 +120,19 @@ def reload():
                         if "groups" in tdata:
                             merge_dict_lists(old["groups"], tdata["groups"])
                         
-                        if "size" not in old:
-                            if "size" in tdata and type(tdata["size"]) == list and len(tdata["size"]) == 2:
-                                old["size"] = tuple(tdata["size"])
+                        if "size" in tdata:
+                            if "size" not in old:
+                                if type(tdata["size"]) == list and len(tdata["size"]) == 2:
+                                    old["size"] = tuple(tdata["size"])
+                        
+                        if "animations" in tdata:
+                            for aid, atypes in tdata["animations"].items():
+                                oldtypes = get_dict(old["animations"], aid.lower(), {})
+
+                                for atype in atypes:
+                                    asize = tuple(atype["size"])
+                                    if asize not in oldtypes:
+                                        oldtypes[asize] = atype
                     except Exception:
                         log.error(f'Failed to load metadata for type "{tname}" in pack {packname}', exc_info=True)
                 

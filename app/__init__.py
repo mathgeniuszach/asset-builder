@@ -14,6 +14,8 @@ class App:
         self.updates = 0
         self.animation_updates = 0
         self.updater = threading.Thread(target=self.update)
+        self.timer = threading.Thread(target=self.time)
+        self.last_time = process_time_ns() // 1000000
 
         # Themes
         log.debug("Loading themes")
@@ -87,6 +89,7 @@ class App:
         
         # show_demo()
         self.updater.start()
+        self.timer.start()
     
     def change(self):
         # Tells the side thread to update.
@@ -139,8 +142,18 @@ class App:
                     except Exception:
                         log.error("Failed to upload active data.", exc_info=True)
     
+    def time(self):
+        while self.running:
+            sleep(0)
+            ntime = process_time_ns() // 1000000
+            delta = ntime - self.last_time
+            if delta:
+                self.img_stack.update_animation(delta)
+                self.last_time = ntime
+    
     def close(self):
         self.running = False
+        self.timer.join()
         self.updater.join()
 
 
